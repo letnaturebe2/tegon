@@ -1,4 +1,3 @@
-'use client';
 import type { Editor as EditorT, Extension, Mark, Node } from '@tiptap/core';
 
 import { EditorInstance, EditorContent, EditorBubble, useEditor } from 'novel';
@@ -140,6 +139,7 @@ export const Editor = ({
     if (value === undefined && editor) {
       editor.commands.clearContent(true);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
