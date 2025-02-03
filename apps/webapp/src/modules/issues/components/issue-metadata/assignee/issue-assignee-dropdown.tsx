@@ -4,6 +4,7 @@ import { Command, CommandInput } from '@tegonhq/ui/components/command';
 import {
   Popover,
   PopoverContent,
+  PopoverPortal,
   PopoverTrigger,
 } from '@tegonhq/ui/components/popover';
 import { AssigneeLine } from '@tegonhq/ui/icons';
@@ -79,10 +80,10 @@ export function IssueAssigneeDropdown({
           {value ? (
             <>
               <AvatarText
-                text={getUserFromUsersData(users, value).fullname}
+                text={getUserFromUsersData(users, value)?.fullname}
                 className="h-5 w-5 text-[9px] mr-2"
               />
-              {getUserFromUsersData(users, value).fullname}
+              {getUserFromUsersData(users, value)?.fullname}
             </>
           ) : (
             <div className="text-muted-foreground flex">
@@ -106,11 +107,11 @@ export function IssueAssigneeDropdown({
         {value ? (
           <>
             <AvatarText
-              text={getUserFromUsersData(users, value).fullname}
+              text={getUserFromUsersData(users, value)?.fullname}
               className="w-5 h-5 text-[9px]"
             />
 
-            {getUserFromUsersData(users, value).fullname}
+            {getUserFromUsersData(users, value)?.fullname}
           </>
         ) : (
           <>
@@ -129,17 +130,19 @@ export function IssueAssigneeDropdown({
     >
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>{getTrigger()}</PopoverTrigger>
-        <PopoverContent className="p-0" align="end">
-          <Command>
-            <CommandInput placeholder="Set assignee..." autoFocus />
-            <IssueAssigneeDropdownContent
-              onClose={() => setOpen(false)}
-              users={users}
-              onChange={onChange}
-              value={value}
-            />
-          </Command>
-        </PopoverContent>
+        <PopoverPortal>
+          <PopoverContent className="p-0" align="end">
+            <Command>
+              <CommandInput placeholder="Set assignee..." autoFocus />
+              <IssueAssigneeDropdownContent
+                onClose={() => setOpen(false)}
+                users={users}
+                onChange={onChange}
+                value={value}
+              />
+            </Command>
+          </PopoverContent>
+        </PopoverPortal>
       </Popover>
     </div>
   );

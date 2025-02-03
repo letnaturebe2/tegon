@@ -1,20 +1,20 @@
 import { Checkbox } from '@tegonhq/ui/components/checkbox';
 import { cn } from '@tegonhq/ui/lib/utils';
 import { observer } from 'mobx-react-lite';
-import { useRouter } from 'next/router';
-import React from 'react';
+import React, { Suspense } from 'react';
 
 import {
-  IssueAssigneeDropdown,
   IssueAssigneeDropdownVariant,
   IssuePriorityDropdown,
   IssuePriorityDropdownVariant,
   IssueStatusDropdown,
   IssueStatusDropdownVariant,
+  LazyIssueAssigneeDropdown,
 } from 'modules/issues/components';
 
 import type { IssueType } from 'common/types';
 
+import { IssueViewContext } from 'components/side-issue-view';
 import { useTeamWithId } from 'hooks/teams/use-current-team';
 
 import { useUpdateIssueMutation } from 'services/issues';
@@ -32,6 +32,7 @@ interface IssueListItemProps {
   issueId: string;
   subIssueView?: boolean;
   noBorder?: boolean;
+  changeHeight?: (issueCount: number) => void;
 }
 
 interface IssueRelationIssuesProps {
@@ -65,12 +66,18 @@ export const IssueRelationIssues = observer(
 );
 
 export const IssueListItem = observer(
-  ({ issueId, subIssueView = false, noBorder = false }: IssueListItemProps) => {
-    const {
-      query: { workspaceSlug },
-    } = useRouter();
-    const { push } = useRouter();
+  ({
+    issueId,
+    subIssueView = false,
+    noBorder = false,
+    changeHeight,
+  }: IssueListItemProps) => {
     const [currentView, setCurrentView] = React.useState<View | undefined>();
+    const {
+      openIssue,
+      issueId: currentViewIssueId,
+      closeIssueView,
+    } = React.useContext(IssueViewContext);
 
     const { mutate: updateIssue } = useUpdateIssueMutation({});
     const { issuesStore, applicationStore } = useContextStore();
@@ -95,8 +102,12 @@ export const IssueListItem = observer(
     return (
       <>
         <a
-          onClick={() => {
-            push(`/${workspaceSlug}/issue/${team.identifier}-${issue.number}`);
+          onClick={(e) => {
+            if (!e.metaKey && currentViewIssueId === issue.id) {
+              closeIssueView();
+              return;
+            }
+            openIssue(issue.id, e.metaKey);
           }}
           className={cn(
             'pl-1 pr-2 flex group cursor-default gap-2',
@@ -175,7 +186,7 @@ export const IssueListItem = observer(
                       projectMilestoneId={issue.projectMilestoneId}
                     />
                     <IssueLabels labelIds={issue.labelIds} />
-                    <div className="w-[80px] mr-8">
+                    <div className="w-[20px] mr-8">
                       <IssuePriorityDropdown
                         value={issue.priority ?? 0}
                         onChange={priorityChange}
@@ -184,12 +195,14 @@ export const IssueListItem = observer(
                       />
                     </div>
                     <div className="min-w-[70px] text-muted-foreground text-xs font-mono">{`${team.identifier}-${issue.number}`}</div>
-                    <IssueAssigneeDropdown
-                      value={issue.assigneeId}
-                      onChange={assigneeChange}
-                      teamId={team.id}
-                      variant={IssueAssigneeDropdownVariant.NO_BACKGROUND}
-                    />
+                    <Suspense>
+                      <LazyIssueAssigneeDropdown
+                        value={issue.assigneeId}
+                        onChange={assigneeChange}
+                        teamId={team.id}
+                        variant={IssueAssigneeDropdownVariant.NO_BACKGROUND}
+                      />
+                    </Suspense>
                   </div>
                 </div>
 
@@ -199,6 +212,7 @@ export const IssueListItem = observer(
                       issue={issue}
                       setCurrentView={setCurrentView}
                       currentView={currentView}
+                      changeHeight={changeHeight}
                     />
                   </div>
                 )}
@@ -214,3 +228,5 @@ export const IssueListItem = observer(
     );
   },
 );
+
+IssueListItem.displayName = 'IssueListItem';

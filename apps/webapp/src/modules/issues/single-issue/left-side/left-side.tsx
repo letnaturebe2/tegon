@@ -23,8 +23,8 @@ import { Activity } from './activity';
 import { FileUpload } from './file-upload';
 import { IssueSubIssueSelector } from './issue-sub-issue-selector';
 import { IssueTitle } from './issue-title';
-import { LinkedIssuesView } from './linked-issues-view';
 import { ParentIssueView } from './parent-issue-view';
+import { RelationsView } from './relations-view';
 import { SimilarIssuesView } from './similar-issues-view';
 import { SubIssueView } from './sub-issue-view';
 
@@ -37,7 +37,7 @@ export const LeftSide = observer(() => {
     (workflow: WorkflowType) =>
       workflow.category === WorkflowCategoryEnum.TRIAGE,
   );
-  const isTriageView = issue.stateId === triageWorkflow.id;
+  const isTriageView = issue.stateId === triageWorkflow?.id;
 
   const { mutate: updateIssue } = useUpdateIssueMutation({});
   const { suggestionItems } = useEditorSuggestionItems();
@@ -64,7 +64,7 @@ export const LeftSide = observer(() => {
 
   return (
     <ScrollArea className="grow flex h-full justify-center w-full">
-      <div className="flex h-full justify-center w-full">
+      <div className="flex h-full justify-center w-full pb-[150px]">
         <div className="grow flex flex-col gap-2 h-full max-w-[97ch]">
           <div className="py-6 flex flex-col">
             {isTriageView && <SimilarIssuesView issueId={issue.id} />}
@@ -91,18 +91,10 @@ export const LeftSide = observer(() => {
             <div className="mx-6">
               <Separator />
             </div>
-
             <SubIssueView childIssues={issue.children} issueId={issue.id} />
 
-            <div className="mx-6">
-              <Separator />
-            </div>
+            <RelationsView issueId={issue.id} />
 
-            <LinkedIssuesView issueId={issue.id} />
-
-            <div className="mx-6">
-              <Separator />
-            </div>
             <Activity />
           </div>
         </div>

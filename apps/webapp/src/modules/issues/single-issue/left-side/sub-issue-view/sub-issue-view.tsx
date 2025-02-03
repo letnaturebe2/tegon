@@ -20,14 +20,12 @@ interface SubIssueViewProps {
 
 export function SubIssueView({ childIssues, issueId }: SubIssueViewProps) {
   const [newIssueDialog, setNewIssueDialog] = React.useState(false);
-  const [isOpen, setOpen] = React.useState(
-    childIssues.length === 0 ? false : true,
-  );
+  const [isOpen, setOpen] = React.useState(false);
   const issues = useSortIssues(childIssues);
 
   return (
     <>
-      <Collapsible open={isOpen} onOpenChange={setOpen} className="w-full py-3">
+      <Collapsible open={isOpen} onOpenChange={setOpen} className="w-full py-2">
         <div className="flex justify-between px-6">
           <div>
             <CollapsibleTrigger asChild>
@@ -52,8 +50,8 @@ export function SubIssueView({ childIssues, issueId }: SubIssueViewProps) {
 
           <div>
             <Button
-              variant="link"
-              className="pr-0"
+              variant="ghost"
+              size="xs"
               onClick={() => setNewIssueDialog(true)}
               disabled={newIssueDialog}
             >
@@ -63,12 +61,12 @@ export function SubIssueView({ childIssues, issueId }: SubIssueViewProps) {
         </div>
         <CollapsibleContent>
           <div className="pt-1 px-3">
-            {issues.map((issue: IssueType, index: number) => (
+            {issues.map((issue: IssueType) => (
               <IssueListItem
                 issueId={issue.id}
                 subIssueView
                 key={issue.id}
-                noBorder={index === issues.length - 1}
+                noBorder={false}
               />
             ))}
           </div>

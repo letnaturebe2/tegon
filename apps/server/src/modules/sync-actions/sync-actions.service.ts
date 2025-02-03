@@ -62,9 +62,8 @@ export default class SyncActionsService {
       orderBy: {
         sequenceId: 'asc',
       },
-      distinct: ['modelName', 'workspaceId', 'modelId', 'action'],
+      distinct: ['modelId'],
     });
-
     const deleteModelIds = new Set(
       syncActions
         .filter((action) => action.action === 'D')

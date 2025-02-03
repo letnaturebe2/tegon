@@ -38,6 +38,17 @@ export const IssuesStore: IAnyStateTreeNode = types
       issues.forEach((issue: IssueType) => {
         self.issuesMap.set(issue.id, Issue.create(issue));
       });
+
+      // Second pass: Build parent-child relationships
+      issues.forEach((issue: IssueType) => {
+        if (issue.parentId) {
+          const parent = self.issuesMap.get(issue.parentId);
+          if (parent) {
+            // Add this issue to parent's children array
+            parent.children.push(issue.id);
+          }
+        }
+      });
     });
 
     return { update, deleteById, load, updateIssue };
@@ -245,6 +256,19 @@ export const IssuesStore: IAnyStateTreeNode = types
       return {
         ...issue,
         parent: issue.parentId ? self.issuesMap.get(issue.parentId) : undefined,
+        children: [],
+      };
+    },
+    getIssueByIdWithChildren(issueId: string): IssueType {
+      const issue = self.issuesMap.get(issueId);
+
+      if (!issue) {
+        return undefined;
+      }
+
+      return {
+        ...issue,
+        parent: issue.parentId ? self.issuesMap.get(issue.parentId) : undefined,
         children: Array.from(self.issuesMap.values()).filter(
           (is: IssueType) => is.parentId === issue.id,
         ),
@@ -252,9 +276,7 @@ export const IssuesStore: IAnyStateTreeNode = types
     },
     getIssuesFromArray(issueIds: string[]): IssueType[] {
       return issueIds
-        .map((issueId: string) =>
-          (self as IssuesStoreType).getIssueById(issueId),
-        )
+        .map((issueId: string) => self.issuesMap.get(issueId))
         .filter(Boolean);
     },
     getIssueByNumber(
@@ -283,9 +305,9 @@ export const IssuesStore: IAnyStateTreeNode = types
       };
     },
     getSubIssues(issueId: string): IssueType[] {
-      return Array.from(self.issuesMap.values()).filter(
-        (issue: IssueType) => issue.parentId === issueId,
-      );
+      return self.issuesMap
+        .get(issueId)
+        .children.map((id) => self.issuesMap.get(id));
     },
 
     // Used by filters

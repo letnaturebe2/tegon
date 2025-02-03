@@ -58,7 +58,7 @@ export const CategoryView = observer(() => {
     .sort(sorting);
 
   return view === ViewEnum.list ? (
-    <CategoryList workflows={workflows} />
+    <CategoryList />
   ) : (
     <CategoryBoard workflows={workflows} />
   );

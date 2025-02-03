@@ -5,6 +5,7 @@ import { ActionsStore } from './action';
 import { ApplicationStore, defaultApplicationStoreValue } from './application';
 import { CommentsStore } from './comments';
 import { CommonStore, defaultCommonStoreValue } from './common';
+import { CompanyStore } from './company';
 import { ConversationHistoryStore } from './conversation-history';
 import { ConversationsStore } from './conversations';
 import { CyclesStore } from './cycle';
@@ -16,7 +17,9 @@ import { IssuesStore } from './issues';
 import { LabelsStore } from './labels';
 import { LinkedIssuesStore } from './linked-issues';
 import { NotificationsStore } from './notifications';
+import { PeopleStore } from './people';
 import { ProjectMilestonesStore, ProjectsStore } from './projects';
+import { SupportStore } from './support';
 import { TeamsStore } from './teams';
 import { TemplatesStore } from './templates';
 import { ViewsStore } from './views';
@@ -46,21 +49,23 @@ const StoreContextModel = types.model({
   conversationsStore: ConversationsStore,
   conversationHistoryStore: ConversationHistoryStore,
   templatesStore: TemplatesStore,
+  companiesStore: CompanyStore,
+  peopleStore: PeopleStore,
+  supportStore: SupportStore,
 });
 
 export const storeContextStore = StoreContextModel.create({
   commentsStore: {
-    comments: [],
+    comments: {},
   },
   issuesHistoryStore: {
-    issueHistories: [],
+    issueHistories: {},
   },
   issuesStore: {
     teamId: undefined,
   },
   workflowsStore: {
-    workflows: [],
-    teamId: undefined,
+    workflows: {},
   },
   labelsStore: {
     labels: [],
@@ -86,12 +91,10 @@ export const storeContextStore = StoreContextModel.create({
     workspaceId: undefined,
   },
   linkedIssuesStore: {
-    linkedIssues: [],
-    issueId: undefined,
+    linkedIssues: {},
   },
   issueRelationsStore: {
-    issueRelations: [],
-    issueId: undefined,
+    issueRelations: {},
   },
   notificationsStore: {
     notifications: [],
@@ -125,6 +128,15 @@ export const storeContextStore = StoreContextModel.create({
   commonStore: defaultCommonStoreValue,
   templatesStore: {
     templates: [],
+  },
+  companiesStore: {
+    companies: {},
+  },
+  peopleStore: {
+    people: {},
+  },
+  supportStore: {
+    support: {},
   },
 });
 

@@ -4,27 +4,43 @@ import React from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Key } from 'ts-key-enum';
 
-import { ContentBox } from 'common/layouts/content-box';
 import { MainLayout } from 'common/layouts/main-layout';
 import { SCOPES } from 'common/scopes';
 
-import { useIssueData } from 'hooks/issues';
+import { IssueViewContext } from 'components/side-issue-view';
+import { IssueDataContext, useIssueDataFromStore } from 'hooks/issues';
+import { useTeamWithId } from 'hooks/teams';
 
 import { useContextStore } from 'store/global-context-provider';
 import { IssueStoreInit } from 'store/issue-store-provider';
 
 import { Header } from './header';
+import { LeftSideSupport } from './left-side';
 import { LeftSide } from './left-side/left-side';
 import { RightSide } from './right-side/right-side';
 
-export const IssueView = observer(() => {
+const getComponent = (teamType: string) => {
+  if (teamType === 'support') {
+    return LeftSideSupport;
+  }
+
+  return LeftSide;
+};
+
+interface IssueViewProps {
+  sideView?: boolean;
+}
+
+export const IssueView = observer(({ sideView = false }: IssueViewProps) => {
   const { applicationStore } = useContextStore();
   const router = useRouter();
+  const { issueId, closeIssueView } = React.useContext(IssueViewContext);
 
-  const issue = useIssueData();
+  const issue = useIssueDataFromStore(sideView);
+  const team = useTeamWithId(issue?.teamId);
 
   React.useEffect(() => {
-    if (issue) {
+    if (issue && !sideView) {
       applicationStore.addToSelectedIssues(issue.id, true);
     }
 
@@ -37,30 +53,36 @@ export const IssueView = observer(() => {
   useHotkeys(
     Key.Escape,
     (e) => {
-      router.back();
+      if (issueId) {
+        closeIssueView();
+      } else {
+        router.back();
+      }
       e.preventDefault();
     },
-    { scopes: [SCOPES.SingleIssues] },
+    { scopes: [SCOPES.SingleIssues], enabled: !issueId },
   );
 
   if (!issue) {
     return null;
   }
 
+  const Component = getComponent(team.preferences.teamType);
+
   return (
-    <IssueStoreInit>
-      <MainLayout header={<Header />}>
-        <ContentBox>
-          <main className="flex h-[calc(100vh_-_53px)]">
-            <div className="grow flex flex-col h-[calc(100vh_-_55px)]">
-              <LeftSide />
+    <IssueDataContext.Provider value={{ issue }}>
+      <MainLayout header={<Header sideView={sideView} />}>
+        <IssueStoreInit sideView={sideView}>
+          <main className="flex h-[calc(100vh_-_62px)]">
+            <div className="grow flex flex-col h-[calc(100vh_-_62px)]">
+              <Component />
             </div>
-            <div className="border-l border-border flex-col flex w-[280px]">
+            <div className="shrink-0 border-l border-border flex-col flex w-[280px] h-[calc(100vh_-_62px)]">
               <RightSide />
             </div>
           </main>
-        </ContentBox>
+        </IssueStoreInit>
       </MainLayout>
-    </IssueStoreInit>
+    </IssueDataContext.Provider>
   );
 });

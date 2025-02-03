@@ -16,6 +16,7 @@ import { AttachmentModule } from 'modules/attachments/attachments.module';
 import { AuthModule } from 'modules/auth/auth.module';
 import { BullConfigModule } from 'modules/bull/bull.module';
 import { CachceModule } from 'modules/cache/cache.module';
+import { CompanyModule } from 'modules/company/company.modules';
 import { ConversationModule } from 'modules/conversation/conversation.module';
 import { ConversationHistoryModule } from 'modules/conversation-history/conversation-history.module';
 import { CyclesModule } from 'modules/cycles/cycles.module';
@@ -30,9 +31,11 @@ import { LabelsModule } from 'modules/labels/labels.module';
 import { LinkedIssueModule } from 'modules/linked-issue/linked-issue.module';
 import { NotificationsModule } from 'modules/notifications/notifications.module';
 import { OAuthCallbackModule } from 'modules/oauth-callback/oauth-callback.module';
+import { PeopleModule } from 'modules/people/people.module';
 import { ProjectsModule } from 'modules/projects/projects.module';
 import { ReplicationModule } from 'modules/replication/replication.module';
 import { SearchModule } from 'modules/search/search.module';
+import { SupportModule } from 'modules/support/support.module';
 import { SyncModule } from 'modules/sync/sync.module';
 import { SyncActionsModule } from 'modules/sync-actions/sync-actions.module';
 import { TeamsModule } from 'modules/teams/teams.module';
@@ -71,7 +74,7 @@ import { AppService } from './app.service';
       transport: {
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT),
-        secure: true,
+        secure: process.env.SMTP_USE_SLS === 'true',
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASSWORD,
@@ -129,6 +132,10 @@ import { AppService } from './app.service';
     ConversationHistoryModule,
 
     CachceModule,
+
+    CompanyModule,
+    PeopleModule,
+    SupportModule,
   ],
   controllers: [AppController],
   providers: [

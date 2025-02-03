@@ -45,6 +45,9 @@ export const SocketDataSyncWrapper: React.FC<Props> = observer(
       conversationsStore,
       conversationHistoryStore,
       templatesStore,
+      peopleStore,
+      companiesStore,
+      supportStore,
     } = useContextStore();
     const user = React.useContext(UserContext);
     const hashKey = `${workspace.id}__${user.id}`;
@@ -98,6 +101,9 @@ export const SocketDataSyncWrapper: React.FC<Props> = observer(
         [MODELS.Conversation]: conversationsStore,
         [MODELS.ConversationHistory]: conversationHistoryStore,
         [MODELS.Template]: templatesStore,
+        [MODELS.People]: peopleStore,
+        [MODELS.Company]: companiesStore,
+        [MODELS.Support]: supportStore,
       };
 
       socket.on('message', async (newMessage: string) => {
@@ -115,6 +121,6 @@ export const SocketDataSyncWrapper: React.FC<Props> = observer(
       return <>{children}</>;
     }
 
-    return <Loader height={500} text="Setting up realtime" />;
+    return <Loader height={500} text="Loading workspace..." />;
   },
 );

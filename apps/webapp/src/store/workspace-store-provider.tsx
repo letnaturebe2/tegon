@@ -1,3 +1,4 @@
+import { Loader } from '@tegonhq/ui/components/loader';
 import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 
@@ -7,6 +8,8 @@ import { useContextStore } from './global-context-provider';
 
 export const WorkspaceStoreInit = observer(
   ({ children }: { children: React.ReactNode }) => {
+    const [loading, setLoading] = React.useState(true);
+
     const {
       workspaceStore,
       teamsStore,
@@ -14,7 +17,6 @@ export const WorkspaceStoreInit = observer(
       integrationAccountsStore,
       issuesStore,
       workflowsStore,
-
       issueRelationsStore,
       notificationsStore,
       viewsStore,
@@ -26,6 +28,9 @@ export const WorkspaceStoreInit = observer(
       conversationsStore,
       conversationHistoryStore,
       templatesStore,
+      supportStore,
+      companiesStore,
+      peopleStore,
     } = useContextStore();
 
     const currentWorkspace = useCurrentWorkspace();
@@ -43,26 +48,36 @@ export const WorkspaceStoreInit = observer(
     // All data related to workspace
     const initWorkspaceBasedStores = React.useCallback(async () => {
       await workspaceStore.load(currentWorkspace.id);
-      await labelsStore.load();
-      await teamsStore.load();
-      await cyclesStore.load();
-      await integrationAccountsStore.load();
-      await issuesStore.load();
       await workflowsStore.load();
-      await issueRelationsStore.load();
-      await notificationsStore.load();
-      await viewsStore.load();
-      await viewsStore.load();
-      await issueSuggestionsStore.load();
-      await actionsStore.load();
-      await projectsStore.load();
-      await projectMilestonesStore.load();
-      await conversationsStore.load();
-      await conversationHistoryStore.load();
-      await templatesStore.load();
+      await teamsStore.load();
+      setLoading(false);
+
+      await Promise.all([
+        labelsStore.load(),
+        cyclesStore.load(),
+        integrationAccountsStore.load(),
+        issuesStore.load(),
+        issueRelationsStore.load(),
+        notificationsStore.load(),
+        viewsStore.load(),
+        issueSuggestionsStore.load(),
+        actionsStore.load(),
+        projectsStore.load(),
+        projectMilestonesStore.load(),
+        conversationsStore.load(),
+        conversationHistoryStore.load(),
+        templatesStore.load(),
+        companiesStore.load(),
+        peopleStore.load(),
+        supportStore.load(),
+      ]);
 
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentWorkspace.id]);
+
+    if (loading) {
+      return <Loader height={500} text="Loading workspace..." />;
+    }
 
     return <>{children}</>;
   },

@@ -1,8 +1,7 @@
 import type { DraggableProvided } from '@hello-pangea/dnd';
 
 import { observer } from 'mobx-react-lite';
-import { useRouter } from 'next/router';
-import React from 'react';
+import React, { type CSSProperties } from 'react';
 
 import {
   IssueAssigneeDropdown,
@@ -13,6 +12,7 @@ import {
   IssueStatusDropdownVariant,
 } from 'modules/issues/components';
 
+import { IssueViewContext } from 'components/side-issue-view';
 import { useTeamWithId } from 'hooks/teams/use-current-team';
 
 import { useUpdateIssueMutation } from 'services/issues';
@@ -29,22 +29,38 @@ interface BoardIssueItemProps {
   issueId: string;
   isDragging: boolean;
   provided: DraggableProvided;
+  style?: CSSProperties;
+  key?: string;
+  measure?: () => void;
 }
 
-function getStyle(provided: DraggableProvided) {
-  // Index signature for type '`--${string}`' is missing in type 'DraggingStyle'.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return provided.draggableProps.style as any;
+function getStyle(provided: DraggableProvided, style?: CSSProperties) {
+  if (!style) {
+    return provided.draggableProps.style;
+  }
+
+  return {
+    ...provided.draggableProps.style,
+    ...style,
+  };
 }
 
 export const BoardIssueItem = observer(
-  ({ issueId, isDragging, provided }: BoardIssueItemProps) => {
-    const {
-      push,
-      query: { workspaceSlug },
-    } = useRouter();
+  ({
+    issueId,
+    isDragging,
+    provided,
+    style,
+    key,
+    measure,
+  }: BoardIssueItemProps) => {
     const { mutate: updateIssue } = useUpdateIssueMutation({});
     const { issuesStore, applicationStore } = useContextStore();
+    const {
+      openIssue,
+      issueId: currentViewIssueId,
+      closeIssueView,
+    } = React.useContext(IssueViewContext);
     const issue = issuesStore.getIssueById(issueId);
     const team = useTeamWithId(issue.teamId);
 
@@ -62,14 +78,26 @@ export const BoardIssueItem = observer(
 
     return (
       <a
-        className="p-3 flex flex-col justify-between group cursor-default rounded-md bg-background-3 dark:bg-grayAlpha-200 w-[100%] gap-2"
-        onClick={() => {
-          push(`/${workspaceSlug}/issue/${team.identifier}-${issue.number}`);
+        className="p-3 flex flex-col justify-between group rounded-md bg-background-3 dark:bg-grayAlpha-200 w-[100%] gap-2 mb-2 !cursor-default hover:bg-background-3/70"
+        onClick={(e) => {
+          if (!e.metaKey && currentViewIssueId === issue.id) {
+            closeIssueView();
+
+            return;
+          }
+          openIssue(issue.id, e.metaKey);
         }}
-        ref={provided.innerRef}
+        ref={(el) => {
+          provided.innerRef(el);
+          // Debounce measure to prevent infinite loop
+          if (el) {
+            setTimeout(measure, 0);
+          }
+        }}
+        key={key}
         {...provided.draggableProps}
         {...provided.dragHandleProps}
-        style={getStyle(provided)}
+        style={getStyle(provided, style)}
         data-is-dragging={isDragging}
         onMouseOver={() => {
           const { selectedIssues } = applicationStore;
